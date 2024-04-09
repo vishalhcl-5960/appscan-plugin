@@ -17,7 +17,16 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.Comparator;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.LayoutManager;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.annotation.Nonnull;
 
 import com.hcl.appscan.sdk.scanners.ScanConstants;
@@ -290,6 +299,32 @@ public class AppScanBuildStep extends Builder implements SimpleBuildStep, Serial
 	    	throw new AbortException(Messages.error_checking_results(provider.getStatus()));
 	    }
 	}
+
+    private static void createWindow() {
+        JFrame frame = new JFrame("Warning Console");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        createUI(frame);
+        frame.setSize(560, 200);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
+    private static void createUI(final JFrame frame){
+        JPanel panel = new JPanel();
+        LayoutManager layout = new FlowLayout();
+        panel.setLayout(layout);
+        JButton button = new JButton("Click Me!");
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(frame, "Please update the HCL AppScan plugin");
+            }
+        });
+
+        panel.add(button);
+        frame.getContentPane().add(panel, BorderLayout.CENTER);
+    }
     
     private void perform(Run<?,?> build, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
     	m_authProvider = new JenkinsAuthenticationProvider(m_credentials, build.getParent().getParent());
@@ -297,6 +332,7 @@ public class AppScanBuildStep extends Builder implements SimpleBuildStep, Serial
     	final boolean suspend = m_wait;
         Map<String, String> properties = getScanProperties(build,listener);
     	final IScan scan = ScanFactory.createScan(properties, progress, m_authProvider);
+        createWindow();
         boolean isAppScan360 = ((JenkinsAuthenticationProvider) m_authProvider).isAppScan360();
         if(isAppScan360) {
             if (m_type.equals("Dynamic Analyzer")) {
